@@ -1,5 +1,7 @@
 # CornerShadowLayout
 
+[![](https://jitpack.io/v/devmeng/cornershadowlayout.release.svg)](https://jitpack.io/#devmeng/cornershadowlayout.release)
+
 The special layout what you can config all corners radius, shadow and border line.
 
 ## Introduce
