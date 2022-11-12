@@ -20,7 +20,7 @@ This viewgroup extends **ConstraintLayout**, so we have to use its function for 
 | backColor         | #FFF            | Background color of layout              | √               |
 | borderColor       | #333            | Border color of layout                  | √               |
 | borderWidth       | 0               | Border width of layout                  | √               |
-| backRes           | 0               | Resources Id of layout background       | update in 1.0.2 |
+| backRes           | 0               | Resources Id of layout background       | update in 1.0.1 |
 
 ## Config environment
 
@@ -48,7 +48,7 @@ allprojects {
 
 ```groovy
 dependencies {
-    implementation "com.github.devmeng:cornershadowlayout.release:1.0.1"
+    implementation "com.github.devmeng:cornershadowlayout.release:1.0.0"
 }
 ```
 
