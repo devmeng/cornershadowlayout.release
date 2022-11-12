@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CornerShadowLayout">
+        <attr name="android:padding" />
+        <attr name="android:paddingHorizontal" />
+        <attr name="android:paddingVertical" />
+        <attr name="shadeRadius" format="dimension" />
+        <attr name="shadeColor" format="color|reference" />
+        <attr name="backRes" format="reference" />
+
+        <attr name="backColor" format="color|reference" />
+        <attr name="borderWidth" format="dimension" />
+        <attr name="borderColor" format="color|reference" />
+
+        <attr name="allCornerRadius" format="dimension" />
+
+        <!-- Radius of the top left corner. -->
+        <attr name="topLeftRadius" format="dimension" />
+        <!-- Radius of the top right corner. -->
+        <attr name="topRightRadius" format="dimension" />
+        <!-- Radius of the bottom left corner. -->
+        <attr name="bottomLeftRadius" format="dimension" />
+        <!-- Radius of the bottom right corner. -->
+        <attr name="bottomRightRadius" format="dimension" />
+
+    </declare-styleable>
+</resources>
