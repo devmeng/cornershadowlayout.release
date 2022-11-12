@@ -31,6 +31,19 @@ android {
     }
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            baselib(MavenPublication) {
+                from components.release
+                groupId = 'com.devmeng'
+                version = '1.0.0'
+                artifactId = 'cornershadowlayout'
+            }
+        }
+    }
+}
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'
