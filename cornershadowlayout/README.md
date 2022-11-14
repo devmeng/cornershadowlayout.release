@@ -40,9 +40,9 @@ or in your root project's **build.gradle**
 
 ```groovy
 allprojects {
-	repositories {
+    repositories {
         maven { url "https://jitpack.io" }
-	}
+    }
 }
 ```
 
