@@ -9,10 +9,11 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.devmeng.baselib.skin.SkinWidgetSupport
-import com.devmeng.baselib.skin.entity.SkinPair
-import com.devmeng.baselib.skin.utils.SkinResources
-import com.devmeng.baselib.utils.Logger
+import com.devmeng.skinlib.skin.SkinWidgetSupport
+import com.devmeng.skinlib.skin.entity.SkinPair
+import com.devmeng.skinlib.skin.utils.SkinResources
+import com.devmeng.skinlib.utils.Log
+import java.util.logging.Logger
 
 /**
  * Created by Richard -> MHS
@@ -342,7 +343,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun offsetChildOutside(left: Int, top: Int, right: Int, bottom: Int) {
         for (i in 0 until childCount) {
             val view = getChildAt(i)
-            Logger.d("top [${view.top}] left [${view.left}] right [${view.right}] bottom [${view.bottom}]")
+            Log.d("top [${view.top}] left [${view.left}] right [${view.right}] bottom [${view.bottom}]")
             view.layout(
                 view.left + left,
                 view.top + top,
@@ -375,7 +376,7 @@ class CornerShadowLayout @JvmOverloads constructor(
      */
     override fun applySkin(pairList: List<SkinPair>) {
         for ((attrName, resId) in pairList) {
-            Logger.d("attrName -> [$attrName] resId -> [$resId]")
+            Log.d("attrName -> [$attrName] resId -> [$resId]")
             when (attrName) {
                 "shadeColor" -> {
                     shadowColor = SkinResources.instance.getColor(resId)
