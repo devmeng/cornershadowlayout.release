@@ -13,7 +13,6 @@ import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
 import com.devmeng.skinlib.skin.utils.SkinResources
 import com.devmeng.skinlib.utils.Log
-import java.util.logging.Logger
 
 /**
  * Created by Richard -> MHS
@@ -191,11 +190,6 @@ class CornerShadowLayout @JvmOverloads constructor(
         //必须关闭硬件加速
         setLayerType(LAYER_TYPE_SOFTWARE, null)
 
-        //设置背景
-        if (backRes == 0) {
-            return
-        }
-        setBackgroundResource(backRes)
     }
 
     private fun getRadiusArray(): FloatArray {

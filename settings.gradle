@@ -22,6 +22,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "PushRemote"
+rootProject.name = "PushCSLRemote"
 include ':app'
 include ':cornershadowlayout'
