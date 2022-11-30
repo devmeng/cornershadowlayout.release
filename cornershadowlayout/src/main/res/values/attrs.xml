@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CornerShadowLayout">
-        <attr name="android:padding" />
-        <attr name="android:paddingHorizontal" />
-        <attr name="android:paddingVertical" />
         <attr name="shadowRadius" format="dimension" />
         <attr name="shadowColor" format="color|reference" />
         <attr name="backRes" format="reference" />

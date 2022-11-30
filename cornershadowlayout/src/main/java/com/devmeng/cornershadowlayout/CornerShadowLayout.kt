@@ -9,10 +9,10 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.devmeng.baselib.skin.SkinWidgetSupport
-import com.devmeng.baselib.skin.entity.SkinPair
-import com.devmeng.baselib.skin.utils.SkinResources
-import com.devmeng.baselib.utils.Logger
+import com.devmeng.skinlib.skin.SkinWidgetSupport
+import com.devmeng.skinlib.skin.entity.SkinPair
+import com.devmeng.skinlib.skin.utils.SkinResources
+import com.devmeng.skinlib.utils.Log
 
 /**
  * Created by Richard -> MHS
@@ -62,9 +62,6 @@ class CornerShadowLayout @JvmOverloads constructor(
     var mHeight: Int = 0
 
     //自定义属性
-    private var padding: Int = 0
-    private var paddingVertical: Int = 0
-    private var paddingHorizontal: Int = 0
     var borderWidth: Float = 0F
     var shadowRadius: Float = 0F
     var allCornerRadius: Float = 0F
@@ -86,18 +83,6 @@ class CornerShadowLayout @JvmOverloads constructor(
             context.obtainStyledAttributes(attrs, R.styleable.CornerShadowLayout)
 
         with(typedArray) {
-
-            //内边距
-            padding = getDimension(
-                R.styleable.CornerShadowLayout_android_padding, padding.toFloat()
-            ).toInt()
-            paddingHorizontal = getDimension(
-                R.styleable.CornerShadowLayout_android_paddingHorizontal,
-                paddingHorizontal.toFloat()
-            ).toInt()
-            paddingVertical = getDimension(
-                R.styleable.CornerShadowLayout_android_paddingVertical, paddingVertical.toFloat()
-            ).toInt()
 
             //背景相关
             backRes =
@@ -190,11 +175,6 @@ class CornerShadowLayout @JvmOverloads constructor(
         //必须关闭硬件加速
         setLayerType(LAYER_TYPE_SOFTWARE, null)
 
-        //设置背景
-        if (backRes == 0) {
-            return
-        }
-        setBackgroundResource(backRes)
     }
 
     private fun getRadiusArray(): FloatArray {
@@ -342,7 +322,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun offsetChildOutside(left: Int, top: Int, right: Int, bottom: Int) {
         for (i in 0 until childCount) {
             val view = getChildAt(i)
-            Logger.d("top [${view.top}] left [${view.left}] right [${view.right}] bottom [${view.bottom}]")
+            Log.d("top [${view.top}] left [${view.left}] right [${view.right}] bottom [${view.bottom}]")
             view.layout(
                 view.left + left,
                 view.top + top,
@@ -375,7 +355,7 @@ class CornerShadowLayout @JvmOverloads constructor(
      */
     override fun applySkin(pairList: List<SkinPair>) {
         for ((attrName, resId) in pairList) {
-            Logger.d("attrName -> [$attrName] resId -> [$resId]")
+            Log.d("attrName -> [$attrName] resId -> [$resId]")
             when (attrName) {
                 "shadeColor" -> {
                     shadowColor = SkinResources.instance.getColor(resId)
