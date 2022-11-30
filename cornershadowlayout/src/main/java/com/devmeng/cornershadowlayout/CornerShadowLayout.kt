@@ -2,18 +2,16 @@ package com.devmeng.cornershadowlayout
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.RectF
+import android.graphics.*
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
 import com.devmeng.skinlib.skin.utils.SkinResources
 import com.devmeng.skinlib.utils.Log
-import java.util.logging.Logger
 
 /**
  * Created by Richard -> MHS
@@ -63,9 +61,6 @@ class CornerShadowLayout @JvmOverloads constructor(
     var mHeight: Int = 0
 
     //自定义属性
-    private var padding: Int = 0
-    private var paddingVertical: Int = 0
-    private var paddingHorizontal: Int = 0
     var borderWidth: Float = 0F
     var shadowRadius: Float = 0F
     var allCornerRadius: Float = 0F
@@ -79,6 +74,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     var shadowColor: Int = R.color.color_black_333
 
     //画笔
+    private val backResPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val cornerBackPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var borderPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -87,18 +83,6 @@ class CornerShadowLayout @JvmOverloads constructor(
             context.obtainStyledAttributes(attrs, R.styleable.CornerShadowLayout)
 
         with(typedArray) {
-
-            //内边距
-            padding = getDimension(
-                R.styleable.CornerShadowLayout_android_padding, padding.toFloat()
-            ).toInt()
-            paddingHorizontal = getDimension(
-                R.styleable.CornerShadowLayout_android_paddingHorizontal,
-                paddingHorizontal.toFloat()
-            ).toInt()
-            paddingVertical = getDimension(
-                R.styleable.CornerShadowLayout_android_paddingVertical, paddingVertical.toFloat()
-            ).toInt()
 
             //背景相关
             backRes =
@@ -161,13 +145,13 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     @SuppressLint("ResourceAsColor")
-    fun initConfig() {
+    private fun initConfig() {
         setWillNotDraw(false)
-        if (allCornerRadius > 0F) {
-            topLeftRadius = allCornerRadius
-            topRightRadius = allCornerRadius
-            bottomLeftRadius = allCornerRadius
-            bottomRightRadius = allCornerRadius
+        allCornerRadius.takeIf { allCornerRadius > 0 }?.let {
+            topLeftRadius = it
+            topRightRadius = it
+            bottomLeftRadius = it
+            bottomRightRadius = it
         }
         //背景画笔
         cornerBackPaint.apply {
@@ -191,11 +175,6 @@ class CornerShadowLayout @JvmOverloads constructor(
         //必须关闭硬件加速
         setLayerType(LAYER_TYPE_SOFTWARE, null)
 
-        //设置背景
-        if (backRes == 0) {
-            return
-        }
-        setBackgroundResource(backRes)
     }
 
     private fun getRadiusArray(): FloatArray {
@@ -295,6 +274,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         with(canvas!!) {
+            //绘制圆角阴影背景
             val offset = (borderWidth + shadowRadius)
             val bgRectF = RectF(
                 offset,
@@ -305,19 +285,52 @@ class CornerShadowLayout @JvmOverloads constructor(
             val bgPath = Path()
             bgPath.addRoundRect(bgRectF, getRadiusArray(), Path.Direction.CW)
             drawPath(bgPath, cornerBackPaint)
-
+            //绘制背景图片
+            if (backRes > 0) {
+                val boundRect = Rect()
+                boundRect.apply {
+                    left = bgRectF.left.toInt()
+                    top = bgRectF.top.toInt()
+                    right = bgRectF.right.toInt()
+                    bottom = bgRectF.bottom.toInt()
+                    val bitmap = initBackShader()
+                    drawPath(bgPath, backResPaint)
+                    bitmap?.recycle()
+                }
+            }
+            //绘制边框线
             val borderRectF = RectF(
                 offset,
                 offset,
                 mWidth - offset,
                 mHeight - offset
             )
-
             val borderPath = Path()
             borderPath.addRoundRect(borderRectF, getRadiusArray(), Path.Direction.CW)
             drawPath(borderPath, borderPaint)
-
         }
+    }
+
+    private fun initBackShader(): Bitmap? {
+        val drawable = ResourcesCompat.getDrawable(context.resources, backRes, null)
+        var bitmap: Bitmap? = null
+        drawable?.apply {
+            val drawableWidth = minimumWidth
+            val drawableHeight = minimumHeight
+            val ratio = height / drawableHeight.toFloat()
+            bitmap = toBitmap(
+                (drawableWidth * ratio).toInt(),
+                (drawableHeight * ratio).toInt(),
+                Bitmap.Config.ARGB_8888
+            )
+            bitmap?.apply {
+                val bitmapShader =
+                    BitmapShader(this, Shader.TileMode.MIRROR, Shader.TileMode.MIRROR)
+                bitmapShader.setLocalMatrix(matrix)
+                backResPaint.shader = bitmapShader
+            }
+        }
+        return bitmap
     }
 
     private fun widthOffsetConfig(offset: Int): Int {

@@ -2,4 +2,9 @@
 <resources>
     <color name="color_black_333">#333333</color>
     <color name="color_white_FFF">#FFFFFF</color>
+    <color name="color_trans_0">#00000000</color>
+    <color name="color_trans_w20">#33FFFFFF</color>
+    <color name="color_trans_w40">#66FFFFFF</color>
+    <color name="color_trans_w60">#99FFFFFF</color>
+    <color name="color_trans_w80">#CCFFFFFF</color>
 </resources>
