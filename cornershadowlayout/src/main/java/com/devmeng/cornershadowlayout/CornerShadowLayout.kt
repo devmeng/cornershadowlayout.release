@@ -62,9 +62,6 @@ class CornerShadowLayout @JvmOverloads constructor(
     var mHeight: Int = 0
 
     //自定义属性
-    private var padding: Int = 0
-    private var paddingVertical: Int = 0
-    private var paddingHorizontal: Int = 0
     var borderWidth: Float = 0F
     var shadowRadius: Float = 0F
     var allCornerRadius: Float = 0F
@@ -86,18 +83,6 @@ class CornerShadowLayout @JvmOverloads constructor(
             context.obtainStyledAttributes(attrs, R.styleable.CornerShadowLayout)
 
         with(typedArray) {
-
-            //内边距
-            padding = getDimension(
-                R.styleable.CornerShadowLayout_android_padding, padding.toFloat()
-            ).toInt()
-            paddingHorizontal = getDimension(
-                R.styleable.CornerShadowLayout_android_paddingHorizontal,
-                paddingHorizontal.toFloat()
-            ).toInt()
-            paddingVertical = getDimension(
-                R.styleable.CornerShadowLayout_android_paddingVertical, paddingVertical.toFloat()
-            ).toInt()
 
             //背景相关
             backRes =
