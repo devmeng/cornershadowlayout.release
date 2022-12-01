@@ -6,6 +6,8 @@ import android.content.Context
 import android.util.DisplayMetrics
 import android.util.TypedValue
 
+val DIP = "dip"
+
 fun px2dp(context: Context, px: Int): Float {
     val density = displayMetrics(context).density
     return (px / density + 0.5f)

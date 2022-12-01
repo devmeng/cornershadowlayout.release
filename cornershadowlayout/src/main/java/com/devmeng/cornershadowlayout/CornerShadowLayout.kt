@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.devmeng.skinlib.skin.EMPTY
 import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
 import com.devmeng.skinlib.skin.utils.SkinPreference
@@ -55,6 +56,9 @@ class CornerShadowLayout @JvmOverloads constructor(
     )
     private val skinResources = SkinResources.instance.skinResources
     private var parentWidth = 0
+    private var parentHeight = 0
+    private var layoutWidth = 0F
+    private var layoutHeight = 0F
 
     private var widthMode: Int = 0
     private var heightMode: Int = 0
@@ -87,6 +91,20 @@ class CornerShadowLayout @JvmOverloads constructor(
 
         with(typedArray) {
 
+            //获取 xml 宽高 用于对 0dp 情况的特殊处理
+            layoutWidth =
+                getString(R.styleable.CornerShadowLayout_android_layout_width)?.replace(
+                    DIP,
+                    EMPTY
+                )?.toFloat()!!
+
+            layoutHeight =
+                getString(R.styleable.CornerShadowLayout_android_layout_height)?.replace(
+                    DIP,
+                    EMPTY
+                )?.toFloat()!!
+
+            Log.d("layout width => $layoutWidth")
             //背景相关
             backRes =
                 getResourceId(R.styleable.CornerShadowLayout_backRes, backRes)
@@ -207,8 +225,12 @@ class CornerShadowLayout @JvmOverloads constructor(
                 mWidth = measuredWidth + widthOffset
                 mHeight = calcHeight() + heightOffset
                 parentWidth = (parent as ViewGroup).measuredWidth
-                if ((parentWidth == mWidth).or(parentWidth == measuredWidth)) {
-                    mWidth = measuredWidth
+                parentHeight = (parent as ViewGroup).measuredHeight
+                if (layoutWidth == 0F) {
+                    mWidth = measuredWidth - widthOffset
+                }
+                if (layoutHeight == 0F) {
+                    mHeight = calcHeight()
                 }
             }
             MeasureSpec.AT_MOST -> {
@@ -258,11 +280,19 @@ class CornerShadowLayout @JvmOverloads constructor(
                     offsetChildOutside(widthOffset / 2, offset, widthOffset / 2, offset)
                 }
                 MeasureSpec.EXACTLY -> {
+                    var offsetWidth = widthOffset / 2
+                    var offsetHeight = heightOffset / 2
+                    if (layoutWidth == 0F) {
+                        offsetWidth = 0
+                    }
+                    if (layoutHeight == 0F) {
+                        offsetHeight = 0
+                    }
                     offsetChildOutside(
-                        widthOffset / 2,
-                        heightOffset / 2,
-                        widthOffset / 2,
-                        heightOffset / 2
+                        offsetWidth,
+                        offsetHeight,
+                        offsetWidth,
+                        offsetHeight
                     )
                 }
                 else -> {
@@ -271,7 +301,7 @@ class CornerShadowLayout @JvmOverloads constructor(
             }
         } else {
             if (heightMode == MeasureSpec.AT_MOST) {
-                offsetChildOutside(0, offset, 0, offset)
+                offsetChildOutside(0, offset / 2, 0, offset / 2)
             }
         }
 
@@ -368,6 +398,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun offsetChildOutside(left: Int, top: Int, right: Int, bottom: Int) {
         for (i in 0 until childCount) {
             val view = getChildAt(i)
+            Log.d("view -> $view")
             Log.d("top [${view.top}] left [${view.left}] right [${view.right}] bottom [${view.bottom}]")
             view.layout(
                 view.left + left,
