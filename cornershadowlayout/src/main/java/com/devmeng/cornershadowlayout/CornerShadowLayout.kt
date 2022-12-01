@@ -5,12 +5,12 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
-import com.devmeng.skinlib.skin.utils.Log
 import com.devmeng.skinlib.skin.utils.SkinPreference
 import com.devmeng.skinlib.skin.utils.SkinResources
 
@@ -53,8 +53,8 @@ class CornerShadowLayout @JvmOverloads constructor(
         "borderColor",
         "borderWidth",
     )
-    private var isSkinApply = false
     private val skinResources = SkinResources.instance.skinResources
+    private var parentWidth = 0
 
     private var widthMode: Int = 0
     private var heightMode: Int = 0
@@ -204,8 +204,12 @@ class CornerShadowLayout @JvmOverloads constructor(
 
         when (widthMode) {
             MeasureSpec.EXACTLY -> {
-                mWidth = widthSize + widthOffset
+                mWidth = measuredWidth + widthOffset
                 mHeight = calcHeight() + heightOffset
+                parentWidth = (parent as ViewGroup).measuredWidth
+                if ((parentWidth == mWidth).or(parentWidth == measuredWidth)) {
+                    mWidth = measuredWidth
+                }
             }
             MeasureSpec.AT_MOST -> {
                 mWidth =
@@ -285,6 +289,7 @@ class CornerShadowLayout @JvmOverloads constructor(
                 mWidth - offset,
                 mHeight - offset
             )
+//            android.util.Log.d("TAG", "$id onDraw: width -> ")
             val bgPath = Path()
             bgPath.addRoundRect(bgRectF, getRadiusArray(), Path.Direction.CW)
             drawPath(bgPath, cornerBackPaint)
@@ -351,9 +356,9 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     private fun heightOffsetConfig(offset: Int): Int {
-        val screenHeight = resources.displayMetrics.heightPixels
+        val screenHeightWithoutStatusBar = resources.displayMetrics.heightPixels - 72
         if (heightMode == MeasureSpec.EXACTLY) {
-            if (heightSize == screenHeight) {
+            if (heightSize == screenHeightWithoutStatusBar) {
                 return 0
             }
         }
@@ -375,7 +380,7 @@ class CornerShadowLayout @JvmOverloads constructor(
 
     private fun calcHeight(): Int =
         if (heightMode == MeasureSpec.EXACTLY) {
-            heightSize
+            measuredHeight
         } else {
             (measuredHeight + shadowRadius.toInt() * 2).coerceAtMost(heightSize)
         }
