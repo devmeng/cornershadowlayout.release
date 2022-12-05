@@ -7,12 +7,10 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.devmeng.skinlib.skin.EMPTY
 import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
-import com.devmeng.skinlib.skin.utils.SkinPreference
 import com.devmeng.skinlib.skin.utils.SkinResources
 
 /**
@@ -50,11 +48,11 @@ class CornerShadowLayout @JvmOverloads constructor(
         "bottomLeftRadius",
         "bottomRightRadius",
         "backRes",
-        "backColor",
         "borderColor",
         "borderWidth",
+        "backColor",
     )
-    private val skinResources = SkinResources.instance.skinResources
+    private var cslRes = context.resources
     private var parentWidth = 0
     private var parentHeight = 0
     private var layoutWidth = 0F
@@ -62,8 +60,6 @@ class CornerShadowLayout @JvmOverloads constructor(
 
     private var widthMode: Int = 0
     private var heightMode: Int = 0
-    private var widthSize: Int = 0
-    private var heightSize: Int = 0
     var mWidth: Int = 0
     var mHeight: Int = 0
 
@@ -215,8 +211,6 @@ class CornerShadowLayout @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         widthMode = MeasureSpec.getMode(widthMeasureSpec)
         heightMode = MeasureSpec.getMode(heightMeasureSpec)
-        widthSize = MeasureSpec.getSize(widthMeasureSpec)
-        heightSize = MeasureSpec.getSize(heightMeasureSpec)
         val widthOffset = widthOffsetConfig(shadowRadius.toInt() * 2)
         val heightOffset = heightOffsetConfig(shadowRadius.toInt() * 2)
 
@@ -350,11 +344,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     private fun initBackShader(): Bitmap? {
-        val drawable = if (SkinPreference.instance.getSkinPath().isEmpty()) {
-            ResourcesCompat.getDrawable(context.resources, backRes, null)
-        } else {
-            SkinResources.instance.getDrawable(resId = backRes)
-        }
+        val drawable = SkinResources.instance.getDrawable(cslRes, backRes)
         var bitmap: Bitmap? = null
         drawable?.apply {
             val drawableWidth = minimumWidth
@@ -378,7 +368,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun widthOffsetConfig(offset: Int): Int {
         val screenWidth = resources.displayMetrics.widthPixels
         if (widthMode == MeasureSpec.EXACTLY) {
-            if (widthSize == screenWidth) {
+            if (measuredWidth == screenWidth) {
                 return 0
             }
         }
@@ -388,7 +378,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun heightOffsetConfig(offset: Int): Int {
         val screenHeightWithoutStatusBar = resources.displayMetrics.heightPixels - 72
         if (heightMode == MeasureSpec.EXACTLY) {
-            if (heightSize == screenHeightWithoutStatusBar) {
+            if (measuredHeight == screenHeightWithoutStatusBar) {
                 return 0
             }
         }
@@ -413,7 +403,7 @@ class CornerShadowLayout @JvmOverloads constructor(
         if (heightMode == MeasureSpec.EXACTLY) {
             measuredHeight
         } else {
-            (measuredHeight + shadowRadius.toInt() * 2).coerceAtMost(heightSize)
+            (measuredHeight + shadowRadius.toInt() * 2).coerceAtMost(measuredHeight)
         }
 
     private fun getColor(color: Int) = context.getColor(color)
@@ -431,41 +421,42 @@ class CornerShadowLayout @JvmOverloads constructor(
      * 应用自定义 View 的皮肤包
      */
     override fun applySkin(pairList: List<SkinPair>) {
+        cslRes = SkinResources.instance.skinResources ?: context.resources
+        //skinlib  reset 后 skinresources 会 = null, reset 后需要重新对所有皮肤值赋值
         for ((attrName, resId) in pairList) {
             Log.d("attrName -> [$attrName] resId -> [$resId]")
-            skinResources?.apply {
-                when (attrName) {
-                    "shadeColor" -> {
-                        shadowColor = SkinResources.instance.getColor(this, resId)
-                    }
-                    "shadeRadius" -> shadowRadius = SkinResources.instance.getDimension(this, resId)
-                    "allCornerRadius" -> {
-                        allCornerRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "topLeftRadius" -> {
-                        topLeftRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "topRightRadius" -> {
-                        topRightRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "bottomLeftRadius" -> {
-                        bottomLeftRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "bottomRightRadius" -> {
-                        bottomRightRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "backRes" -> {
-                        backRes = SkinResources.instance.getDrawableId(this, resId)
-                    }
-                    "backColor" -> {
-                        backColor = SkinResources.instance.getColor(this, resId)
-                    }
-                    "borderColor" -> {
-                        borderColor = SkinResources.instance.getColor(this, resId)
-                    }
-                    "borderWidth" -> {
-                        borderWidth = SkinResources.instance.getDimension(this, resId)
-                    }
+            when (attrName) {
+                "shadowColor" -> {
+                    shadowColor = SkinResources.instance.getColor(resources, resId)
+                }
+                "shadowRadius" -> shadowRadius =
+                    SkinResources.instance.getDimension(resources, resId)
+                "allCornerRadius" -> {
+                    allCornerRadius = SkinResources.instance.getDimension(resources, resId)
+                }
+                "topLeftRadius" -> {
+                    topLeftRadius = SkinResources.instance.getDimension(resources, resId)
+                }
+                "topRightRadius" -> {
+                    topRightRadius = SkinResources.instance.getDimension(resources, resId)
+                }
+                "bottomLeftRadius" -> {
+                    bottomLeftRadius = SkinResources.instance.getDimension(resources, resId)
+                }
+                "bottomRightRadius" -> {
+                    bottomRightRadius = SkinResources.instance.getDimension(resources, resId)
+                }
+                "backRes" -> {
+                    backRes = SkinResources.instance.getDrawableId(resources, resId)
+                }
+                "backColor" -> {
+                    backColor = SkinResources.instance.getColor(resources, resId)
+                }
+                "borderColor" -> {
+                    borderColor = SkinResources.instance.getColor(resources, resId)
+                }
+                "borderWidth" -> {
+                    borderWidth = SkinResources.instance.getDimension(resources, resId)
                 }
             }
         }

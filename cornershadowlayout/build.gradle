@@ -9,7 +9,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        minSdk 26
+        minSdk 27
         targetSdk 32
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -37,7 +37,7 @@ afterEvaluate {
             baselib(MavenPublication) {
                 from components.release
                 groupId = 'com.devmeng'
-                version = '1.0.0'
+                version = '1.0.1'
                 artifactId = 'cornershadowlayout'
             }
         }
