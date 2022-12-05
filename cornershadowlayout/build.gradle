@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace 'com.devmeng.cornershadowlayout'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         minSdk 27
-        targetSdk 32
+        targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -37,7 +37,7 @@ afterEvaluate {
             baselib(MavenPublication) {
                 from components.release
                 groupId = 'com.devmeng'
-                version = '1.0.1'
+                version = '1.0.2'
                 artifactId = 'cornershadowlayout'
             }
         }
