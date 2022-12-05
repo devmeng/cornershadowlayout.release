@@ -12,7 +12,6 @@ import androidx.core.graphics.drawable.toBitmap
 import com.devmeng.skinlib.skin.EMPTY
 import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
-import com.devmeng.skinlib.skin.utils.SkinPreference
 import com.devmeng.skinlib.skin.utils.SkinResources
 
 /**
@@ -350,11 +349,8 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     private fun initBackShader(): Bitmap? {
-        val drawable = if (SkinPreference.instance.getSkinPath().isEmpty()) {
-            ResourcesCompat.getDrawable(context.resources, backRes, null)
-        } else {
-            SkinResources.instance.getDrawable(resId = backRes)
-        }
+        val drawable = ResourcesCompat.getDrawable(context.resources, backRes, null)
+
         var bitmap: Bitmap? = null
         drawable?.apply {
             val drawableWidth = minimumWidth
@@ -455,7 +451,7 @@ class CornerShadowLayout @JvmOverloads constructor(
                         bottomRightRadius = SkinResources.instance.getDimension(this, resId)
                     }
                     "backRes" -> {
-                        backRes = SkinResources.instance.getDrawableId(this, resId)
+                        backRes = resId
                     }
                     "backColor" -> {
                         backColor = SkinResources.instance.getColor(this, resId)
