@@ -34,7 +34,7 @@ allprojects {
 
 ```groovy
 dependencies {
-    implementation "com.github.devmeng:cornershadowlayout.release:1.0.2"
+    implementation "com.github.devmeng:cornershadowlayout.release:1.0.3"
 }
 ```
 
@@ -64,7 +64,7 @@ Using without **backRes** and **Skins**.
 
 This version update **backRes** for changing background in area of drawing CSL. And updating the function of  changing skins.
 
-### v1.0.2
+### v1.0.2 - v1.0.3
 
 Cause bout the wrong of changing skins for backRes, this version fixes it.
 
