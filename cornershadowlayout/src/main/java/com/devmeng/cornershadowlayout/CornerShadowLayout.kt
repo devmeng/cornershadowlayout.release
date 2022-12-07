@@ -5,13 +5,12 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.devmeng.skinlib.skin.EMPTY
 import com.devmeng.skinlib.skin.SkinWidgetSupport
 import com.devmeng.skinlib.skin.entity.SkinPair
-import com.devmeng.skinlib.skin.utils.Log
-import com.devmeng.skinlib.skin.utils.SkinPreference
 import com.devmeng.skinlib.skin.utils.SkinResources
 
 /**
@@ -49,17 +48,18 @@ class CornerShadowLayout @JvmOverloads constructor(
         "bottomLeftRadius",
         "bottomRightRadius",
         "backRes",
-        "backColor",
         "borderColor",
         "borderWidth",
+        "backColor",
     )
-    private var isSkinApply = false
-    private val skinResources = SkinResources.instance.skinResources
+    private var cslRes = context.resources
+    private var parentWidth = 0
+    private var parentHeight = 0
+    private var layoutWidth = 0F
+    private var layoutHeight = 0F
 
     private var widthMode: Int = 0
     private var heightMode: Int = 0
-    private var widthSize: Int = 0
-    private var heightSize: Int = 0
     var mWidth: Int = 0
     var mHeight: Int = 0
 
@@ -87,6 +87,20 @@ class CornerShadowLayout @JvmOverloads constructor(
 
         with(typedArray) {
 
+            //获取 xml 宽高 用于对 0dp 情况的特殊处理
+            layoutWidth =
+                getString(R.styleable.CornerShadowLayout_android_layout_width)?.replace(
+                    DIP,
+                    EMPTY
+                )?.toFloat()!!
+
+            layoutHeight =
+                getString(R.styleable.CornerShadowLayout_android_layout_height)?.replace(
+                    DIP,
+                    EMPTY
+                )?.toFloat()!!
+
+            Log.d("layout width => $layoutWidth")
             //背景相关
             backRes =
                 getResourceId(R.styleable.CornerShadowLayout_backRes, backRes)
@@ -197,15 +211,21 @@ class CornerShadowLayout @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         widthMode = MeasureSpec.getMode(widthMeasureSpec)
         heightMode = MeasureSpec.getMode(heightMeasureSpec)
-        widthSize = MeasureSpec.getSize(widthMeasureSpec)
-        heightSize = MeasureSpec.getSize(heightMeasureSpec)
         val widthOffset = widthOffsetConfig(shadowRadius.toInt() * 2)
         val heightOffset = heightOffsetConfig(shadowRadius.toInt() * 2)
 
         when (widthMode) {
             MeasureSpec.EXACTLY -> {
-                mWidth = widthSize + widthOffset
+                mWidth = measuredWidth + widthOffset
                 mHeight = calcHeight() + heightOffset
+                parentWidth = (parent as ViewGroup).measuredWidth
+                parentHeight = (parent as ViewGroup).measuredHeight
+                if (layoutWidth == 0F) {
+                    mWidth = measuredWidth - widthOffset
+                }
+                if (layoutHeight == 0F) {
+                    mHeight = calcHeight()
+                }
             }
             MeasureSpec.AT_MOST -> {
                 mWidth =
@@ -254,11 +274,19 @@ class CornerShadowLayout @JvmOverloads constructor(
                     offsetChildOutside(widthOffset / 2, offset, widthOffset / 2, offset)
                 }
                 MeasureSpec.EXACTLY -> {
+                    var offsetWidth = widthOffset / 2
+                    var offsetHeight = heightOffset / 2
+                    if (layoutWidth == 0F) {
+                        offsetWidth = 0
+                    }
+                    if (layoutHeight == 0F) {
+                        offsetHeight = 0
+                    }
                     offsetChildOutside(
-                        widthOffset / 2,
-                        heightOffset / 2,
-                        widthOffset / 2,
-                        heightOffset / 2
+                        offsetWidth,
+                        offsetHeight,
+                        offsetWidth,
+                        offsetHeight
                     )
                 }
                 else -> {
@@ -267,7 +295,7 @@ class CornerShadowLayout @JvmOverloads constructor(
             }
         } else {
             if (heightMode == MeasureSpec.AT_MOST) {
-                offsetChildOutside(0, offset, 0, offset)
+                offsetChildOutside(0, offset / 2, 0, offset / 2)
             }
         }
 
@@ -285,6 +313,7 @@ class CornerShadowLayout @JvmOverloads constructor(
                 mWidth - offset,
                 mHeight - offset
             )
+//            android.util.Log.d("TAG", "$id onDraw: width -> ")
             val bgPath = Path()
             bgPath.addRoundRect(bgRectF, getRadiusArray(), Path.Direction.CW)
             drawPath(bgPath, cornerBackPaint)
@@ -303,10 +332,10 @@ class CornerShadowLayout @JvmOverloads constructor(
             }
             //绘制边框线
             val borderRectF = RectF(
-                offset,
-                offset,
-                mWidth - offset,
-                mHeight - offset
+                bgRectF.left,
+                bgRectF.top,
+                bgRectF.right,
+                bgRectF.bottom
             )
             val borderPath = Path()
             borderPath.addRoundRect(borderRectF, getRadiusArray(), Path.Direction.CW)
@@ -315,11 +344,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     private fun initBackShader(): Bitmap? {
-        val drawable = if (SkinPreference.instance.getSkinPath().isEmpty()) {
-            ResourcesCompat.getDrawable(context.resources, backRes, null)
-        } else {
-            SkinResources.instance.getDrawable(resId = backRes)
-        }
+        val drawable = SkinResources.instance.getDrawable(backRes, cslRes)
         var bitmap: Bitmap? = null
         drawable?.apply {
             val drawableWidth = minimumWidth
@@ -343,7 +368,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun widthOffsetConfig(offset: Int): Int {
         val screenWidth = resources.displayMetrics.widthPixels
         if (widthMode == MeasureSpec.EXACTLY) {
-            if (widthSize == screenWidth) {
+            if (measuredWidth == screenWidth) {
                 return 0
             }
         }
@@ -351,9 +376,9 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     private fun heightOffsetConfig(offset: Int): Int {
-        val screenHeight = resources.displayMetrics.heightPixels
+        val screenHeightWithoutStatusBar = resources.displayMetrics.heightPixels - 72
         if (heightMode == MeasureSpec.EXACTLY) {
-            if (heightSize == screenHeight) {
+            if (measuredHeight == screenHeightWithoutStatusBar) {
                 return 0
             }
         }
@@ -363,6 +388,7 @@ class CornerShadowLayout @JvmOverloads constructor(
     private fun offsetChildOutside(left: Int, top: Int, right: Int, bottom: Int) {
         for (i in 0 until childCount) {
             val view = getChildAt(i)
+            Log.d("view -> $view")
             Log.d("top [${view.top}] left [${view.left}] right [${view.right}] bottom [${view.bottom}]")
             view.layout(
                 view.left + left,
@@ -375,9 +401,9 @@ class CornerShadowLayout @JvmOverloads constructor(
 
     private fun calcHeight(): Int =
         if (heightMode == MeasureSpec.EXACTLY) {
-            heightSize
+            measuredHeight
         } else {
-            (measuredHeight + shadowRadius.toInt() * 2).coerceAtMost(heightSize)
+            (measuredHeight + shadowRadius.toInt() * 2).coerceAtMost(measuredHeight)
         }
 
     private fun getColor(color: Int) = context.getColor(color)
@@ -394,42 +420,42 @@ class CornerShadowLayout @JvmOverloads constructor(
     /**
      * 应用自定义 View 的皮肤包
      */
-    override fun applySkin(pairList: List<SkinPair>) {
+    override fun applySkin(skinResources: SkinResources, pairList: List<SkinPair>) {
+        cslRes = SkinResources.instance.skinResources ?: context.resources
         for ((attrName, resId) in pairList) {
             Log.d("attrName -> [$attrName] resId -> [$resId]")
-            skinResources?.apply {
-                when (attrName) {
-                    "shadeColor" -> {
-                        shadowColor = SkinResources.instance.getColor(this, resId)
-                    }
-                    "shadeRadius" -> shadowRadius = SkinResources.instance.getDimension(this, resId)
-                    "allCornerRadius" -> {
-                        allCornerRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "topLeftRadius" -> {
-                        topLeftRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "topRightRadius" -> {
-                        topRightRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "bottomLeftRadius" -> {
-                        bottomLeftRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "bottomRightRadius" -> {
-                        bottomRightRadius = SkinResources.instance.getDimension(this, resId)
-                    }
-                    "backRes" -> {
-                        backRes = SkinResources.instance.getDrawableId(this, resId)
-                    }
-                    "backColor" -> {
-                        backColor = SkinResources.instance.getColor(this, resId)
-                    }
-                    "borderColor" -> {
-                        borderColor = SkinResources.instance.getColor(this, resId)
-                    }
-                    "borderWidth" -> {
-                        borderWidth = SkinResources.instance.getDimension(this, resId)
-                    }
+            when (attrName) {
+                "shadowColor" -> {
+                    shadowColor = SkinResources.instance.getColor(resId)
+                }
+                "shadowRadius" -> shadowRadius =
+                    SkinResources.instance.getDimension(resId)
+                "allCornerRadius" -> {
+                    allCornerRadius = SkinResources.instance.getDimension(resId)
+                }
+                "topLeftRadius" -> {
+                    topLeftRadius = SkinResources.instance.getDimension(resId)
+                }
+                "topRightRadius" -> {
+                    topRightRadius = SkinResources.instance.getDimension(resId)
+                }
+                "bottomLeftRadius" -> {
+                    bottomLeftRadius = SkinResources.instance.getDimension(resId)
+                }
+                "bottomRightRadius" -> {
+                    bottomRightRadius = SkinResources.instance.getDimension(resId)
+                }
+                "backRes" -> {
+                    backRes = SkinResources.instance.getDrawableId(resId)
+                }
+                "backColor" -> {
+                    backColor = SkinResources.instance.getColor(resId)
+                }
+                "borderColor" -> {
+                    borderColor = SkinResources.instance.getColor(resId)
+                }
+                "borderWidth" -> {
+                    borderWidth = SkinResources.instance.getDimension(resId)
                 }
             }
         }
