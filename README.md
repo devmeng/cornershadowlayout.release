@@ -1,4 +1,4 @@
-# CornerShadowLayout
+# CornerShadowLayout API 27
 
 [![](https://jitpack.io/v/devmeng/cornershadowlayout.release.svg)](https://jitpack.io/#devmeng/cornershadowlayout.release)
 
@@ -34,7 +34,7 @@ allprojects {
 
 ```groovy
 dependencies {
-    implementation "com.github.devmeng:cornershadowlayout.release:1.0.1"
+    implementation "com.github.devmeng:cornershadowlayout.release:1.0.2"
 }
 ```
 
@@ -52,8 +52,28 @@ dependencies {
 | backColor         | #FFF            | Background color of layout                 | √      |
 | borderColor       | #333            | Border color of layout                     | √      |
 | borderWidth       | 0               | Border width of layout                     | √      |
-| backRes           | 0               | Drawable resources Id of background in CSL | √      |
+| backRes           | 0               | Drawable resources Id of background in CSL | >1.0.0 |
+
+## Version Introduce
+
+### v1.0.0
+
+Using without **backRes** and **Skins**.
+
+### v1.0.1
+
+This version update **backRes** for changing background in area of drawing CSL. And updating the function of  changing skins.
+
+### v1.0.2
+
+Cause bout the wrong of changing skins for backRes, this version fixes it.
+
+Please check the link if you wanna change its skins under here and initialize it follow README.
+
+**Link skinlib.release: https://github.com/devmeng/skinlib.release** 
+
+
 
 ## Best wishes
 
-:D
+Updating from time to time, keep following please. ;D
