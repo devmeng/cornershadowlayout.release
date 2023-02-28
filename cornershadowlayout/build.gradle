@@ -37,7 +37,7 @@ afterEvaluate {
             baselib(MavenPublication) {
                 from components.release
                 groupId = 'com.devmeng'
-                version = '1.0.2'
+                version = '1.0.4'
                 artifactId = 'cornershadowlayout'
             }
         }
