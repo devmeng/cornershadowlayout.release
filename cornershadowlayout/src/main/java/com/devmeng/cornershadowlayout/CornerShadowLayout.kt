@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.devmeng.skinlib.skin.EMPTY
 import com.devmeng.skinlib.skin.SkinWidgetSupport
@@ -344,7 +345,11 @@ class CornerShadowLayout @JvmOverloads constructor(
     }
 
     private fun initBackShader(): Bitmap? {
-        val drawable = SkinResources.instance.getDrawable(backRes, cslRes)
+        var drawable = SkinResources.instance.getDrawable(backRes, cslRes)
+        //未使用动态换肤库的资源设定
+        if (drawable == null) {
+            drawable = ContextCompat.getDrawable(context, backRes)
+        }
         var bitmap: Bitmap? = null
         drawable?.apply {
             val drawableWidth = minimumWidth
