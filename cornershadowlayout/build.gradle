@@ -34,10 +34,10 @@ android {
 afterEvaluate {
     publishing {
         publications {
-            baselib(MavenPublication) {
+            csl(MavenPublication) {
                 from components.release
                 groupId = 'com.devmeng'
-                version = '1.1.0'
+                version = '1.1.1'
                 artifactId = 'cornershadowlayout'
             }
         }
